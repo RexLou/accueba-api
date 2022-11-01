@@ -16,5 +16,6 @@ employeeMod(app);
 transaction(app);
 attendance(app);
 salaryComputation(app);
+
 exports.api = functions.runWith({ memory: "1GB" }).https.onRequest(app);
 app.listen(3000, () => console.log("running on port 3000"));
