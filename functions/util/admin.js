@@ -1,6 +1,6 @@
 const admin = require("firebase-admin");
 
-var serviceAccount = require("./accueba-db-firebase-adminsdk-iv5o4-d7588ec103.json");
+const serviceAccount = require("./accueba-db-firebase-adminsdk-iv5o4-5d5717c76c.json");
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
