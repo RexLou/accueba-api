@@ -1,6 +1,12 @@
 const { get } = require("http");
 const { db } = require("../util/admin");
-const { getCurrentMonth, getCurrentDay } = require("../util/date-util");
+const {
+  getCurrentMonth,
+  getCurrentDay,
+  isExistInArray,
+  getCurrentMonthShort,
+  isEmptyArray,
+} = require("../util/date-util");
 
 exports.createAttendance = async (id) => {
   const currentMonthYear = getCurrentMonth();
@@ -18,33 +24,115 @@ exports.createAttendance = async (id) => {
     .set(attendanceMap, { merge: true });
 };
 
-exports.timeInAttendance = async (id) => {
+exports.timeInAttendance = async (id, attendanceContainer) => {
   const currentMonthYear = getCurrentMonth();
-  const getCurrDay = getCurrentDay();
-  const attendanceMap = {};
-  attendanceMap[getCurrDay] = {
-    timeIn: new Date(),
-  };
+  const getCurrentMonthShortData = getCurrentMonthShort();
+
+  const timeClockArray = isEmptyArray(attendanceContainer);
+
+  if (isExistInArray(timeClockArray, getCurrentMonthShortData)) {
+    for (let i = 0; i < timeClockArray.length; i++) {
+      if (timeClockArray[i].dateNow === getCurrentMonthShortData) {
+        timeClockArray[i].timeIn = new Date();
+      }
+    }
+  } else {
+    timeClockArray.push({
+      timeIn: new Date(),
+      dateNow: getCurrentMonthShortData,
+    });
+  }
+
   await db
     .collection("Employee")
     .doc(id)
     .collection("Attendance")
     .doc(currentMonthYear)
-    .set({}, { merge: true });
+    .set({ timeClock: timeClockArray }, { merge: true });
 };
-exports.timeOutAttendance = async (id) => {
+exports.timeOutAttendance = async (id, attendanceContainer) => {
   const currentMonthYear = getCurrentMonth();
-  const getCurrDay = getCurrentDay();
-  const attendanceMap = {};
-  attendanceMap[getCurrDay] = {
-    timeOut: new Date(),
-  };
+  const getCurrentMonthShortData = getCurrentMonthShort();
+
+  const timeClockArray = isEmptyArray(attendanceContainer);
+
+  if (isExistInArray(timeClockArray, getCurrentMonthShortData)) {
+    for (let i = 0; i < timeClockArray.length; i++) {
+      if (timeClockArray[i].dateNow === getCurrentMonthShortData) {
+        timeClockArray[i].timeOut = new Date();
+      }
+    }
+  } else {
+    timeClockArray.push({
+      timeOut: new Date(),
+      dateNow: getCurrentMonthShortData,
+    });
+  }
+
   await db
     .collection("Employee")
     .doc(id)
     .collection("Attendance")
     .doc(currentMonthYear)
-    .set({}, { merge: true });
+    .set({ timeClock: timeClockArray }, { merge: true });
+};
+
+exports.sickLeaveAttendance = async (id, attendanceContainer) => {
+  const currentMonthYear = getCurrentMonth();
+  const getCurrentMonthShortData = getCurrentMonthShort();
+
+  const timeClockArray = isEmptyArray(attendanceContainer);
+
+  if (isExistInArray(timeClockArray, getCurrentMonthShortData)) {
+    for (let i = 0; i < timeClockArray.length; i++) {
+      if (timeClockArray[i].dateNow === getCurrentMonthShortData) {
+        timeClockArray[i].timeStamp = new Date();
+        timeClockArray[i].leave = "Sick Leave";
+      }
+    }
+  } else {
+    timeClockArray.push({
+      timeStamp: new Date(),
+      leave: "Sick Leave",
+      dateNow: getCurrentMonthShortData,
+    });
+  }
+
+  await db
+    .collection("Employee")
+    .doc(id)
+    .collection("Attendance")
+    .doc(currentMonthYear)
+    .set({ timeClock: timeClockArray }, { merge: true });
+};
+
+exports.vacationLeaveAttendance = async (id, attendanceContainer) => {
+  const currentMonthYear = getCurrentMonth();
+  const getCurrentMonthShortData = getCurrentMonthShort();
+
+  const timeClockArray = isEmptyArray(attendanceContainer);
+
+  if (isExistInArray(timeClockArray, getCurrentMonthShortData)) {
+    for (let i = 0; i < timeClockArray.length; i++) {
+      if (timeClockArray[i].dateNow === getCurrentMonthShortData) {
+        timeClockArray[i].timeStamp = new Date();
+        timeClockArray[i].leave = "Vacation Leave";
+      }
+    }
+  } else {
+    timeClockArray.push({
+      timeStamp: new Date(),
+      leave: "Vacation Leave",
+      dateNow: getCurrentMonthShortData,
+    });
+  }
+
+  await db
+    .collection("Employee")
+    .doc(id)
+    .collection("Attendance")
+    .doc(currentMonthYear)
+    .set({ timeClock: timeClockArray }, { merge: true });
 };
 
 exports.deleteAttendance = async (employeeID) => {
@@ -66,6 +154,7 @@ exports.getAttendance = async (id) => {
     .doc(currentMonthYear)
     .get();
   const employeeDoc = employeeRef.data();
+
   return employeeDoc;
 };
 

@@ -5,6 +5,8 @@ const {
   deleteAttendance,
   getAttendance,
   isAttendanceDocExists,
+  sickLeaveAttendance,
+  vacationLeaveAttendance,
 } = require("../../repositories/attendance-repos");
 
 const { response } = require("../../util/response");
@@ -12,7 +14,12 @@ const { response } = require("../../util/response");
 exports.timeInAttendance = async (req, res) => {
   try {
     const employeeID = req.body.employeeID;
-    await timeInAttendance(employeeID);
+    console.log(employeeID);
+    const attendanceContainer = await getAttendance(employeeID);
+
+    await timeInAttendance(employeeID, attendanceContainer).then((val) => {
+      response(res, 200, "successfully time-out", "success");
+    });
   } catch (error) {
     response(res, 400, error.message, "something went wrong.");
   }
@@ -21,12 +28,41 @@ exports.timeInAttendance = async (req, res) => {
 exports.timeOutAttendance = async (req, res) => {
   try {
     const employeeID = req.body.employeeID;
-    await timeOutAttendance(employeeID);
+    const attendanceContainer = await getAttendance(employeeID);
+
+    await timeOutAttendance(employeeID, attendanceContainer).then((val) => {
+      response(res, 200, "successfully time-out", "success");
+    });
   } catch (error) {
     response(res, 400, error.message, "something went wrong.");
   }
 };
+exports.sickLeaveAttendacnce = async (req, res) => {
+  try {
+    const employeeID = req.body.employeeID;
+    const attendanceContainer = await getAttendance(employeeID);
 
+    await sickLeaveAttendance(employeeID, attendanceContainer).then((val) => {
+      response(res, 200, "successfully time-out", "success");
+    });
+  } catch (error) {
+    response(res, 400, error.message, "something went wrong.");
+  }
+};
+exports.vacationLeaveAttendacnce = async (req, res) => {
+  try {
+    const employeeID = req.body.employeeID;
+    const attendanceContainer = await getAttendance(employeeID);
+
+    await vacationLeaveAttendance(employeeID, attendanceContainer).then(
+      (val) => {
+        response(res, 200, "successfully time-out", "success");
+      }
+    );
+  } catch (error) {
+    response(res, 400, error.message, "something went wrong.");
+  }
+};
 exports.deleteAttendance = async (req, res) => {
   try {
     const employeeID = req.body.employeeID;
@@ -39,7 +75,10 @@ exports.deleteAttendance = async (req, res) => {
 exports.getAttendance = async (req, res) => {
   try {
     const employeeID = req.body.employeeID;
-    await getAttendance(employeeID);
+    await getAttendance(employeeID).then((val) => {
+      console.log(val);
+      response(res, 400, "success", val);
+    });
   } catch (error) {
     response(res, 400, error.message, "something went wrong.");
   }

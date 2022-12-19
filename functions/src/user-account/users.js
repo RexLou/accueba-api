@@ -18,9 +18,12 @@ exports.register = async (req, res) => {
 
 exports.login = async (req, res) => {
   try {
-    const userID = req.body.userID;
+    const empID = req.body.empID;
     const password = req.body.password;
-    const employeeRef = await loginAccount(userID, password);
+    console.log(empID);
+    console.log(password);
+    const employeeRef = await loginAccount(empID, password);
+
     if (employeeRef.isAccountExists) {
       response(res, 200, "account exists!", employeeRef.employeeDoc);
       return;

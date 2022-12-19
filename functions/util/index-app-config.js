@@ -1,6 +1,6 @@
-exports.appConfig = (app, cors, expressJson, expressUrlEncoded) => {
+exports.appConfig = (app, cors, expressJson) => {
   app.use(expressJson);
-  app.use(expressUrlEncoded);
+
   app.use(cors);
   app.options("*", cors);
 };

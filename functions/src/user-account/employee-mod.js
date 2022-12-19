@@ -2,7 +2,7 @@ const {
   createEmpDoc,
   getEmpDoc,
   deleteDoc,
-} = require("../../repositories/employe-mod-repo");
+} = require("../../repositories/employee-mod-repo");
 const { response } = require("../../util/response");
 const {
   driverLicenseModel,
