@@ -1,5 +1,7 @@
 const { db } = require("../util/admin");
 const { createAttendance } = require("./attendance-repos");
+const collectionRef = db.collection("Employee");
+
 exports.createEmployeeDetails = async (data) => {
   await db
     .collection("Employee")
@@ -8,6 +10,21 @@ exports.createEmployeeDetails = async (data) => {
       createAttendance(val.id);
       res.send({ status: 200, message: "success" });
     });
+};
+
+exports.findEmployees = async () => {
+  const output = [];
+  const employees = await collectionRef.get();
+  if (!employees.empty) {
+    employees.forEach((emp) => {
+      output.push({ ...emp.data(), id: emp.id });
+    });
+  }
+  return output;
+};
+
+exports.findEmployeeById = (id) => {
+  return collectionRef.doc(id).get();
 };
 
 exports.loginAccount = async (userID, password) => {
@@ -33,6 +50,9 @@ exports.loginAccount = async (userID, password) => {
   };
 };
 
-exports.updateAccount = async (data) => {
-  await db.collection("Employee").add({ ...data });
+exports.updateAccount = (empId, data) => {
+  return db
+    .collection("Employee")
+    .doc(empId)
+    .update({ ...data });
 };

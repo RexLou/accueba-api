@@ -7,6 +7,9 @@ const {
   isAttendanceDocExists,
   sickLeaveAttendance,
   vacationLeaveAttendance,
+  getPendingLeaves,
+  approveLeave,
+  updateLeaveStatus,
 } = require("../../repositories/attendance-repos");
 
 const { response } = require("../../util/response");
@@ -81,5 +84,22 @@ exports.getAttendance = async (req, res) => {
     });
   } catch (error) {
     response(res, 400, error.message, "something went wrong.");
+  }
+};
+
+exports.getLeaveRequests = async (req, res) => {
+  const requestType = req.body.requestType;
+  const leaves = await getPendingLeaves(requestType);
+
+  response(res, 200, `found ${requestType}/s`, leaves);
+};
+
+exports.approveLeaveRequests = async (req, res) => {
+  const { employeeID, monthGroup, leaveDate, status } = req.body;
+  try {
+    await updateLeaveStatus(employeeID, monthGroup, leaveDate, status);
+    response(res, 200, "Update success");
+  } catch (error) {
+    response(res, 400, error.message);
   }
 };

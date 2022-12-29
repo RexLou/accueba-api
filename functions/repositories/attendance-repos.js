@@ -1,4 +1,3 @@
-const { get } = require("http");
 const { db } = require("../util/admin");
 const {
   getCurrentMonth,
@@ -133,6 +132,56 @@ exports.vacationLeaveAttendance = async (id, attendanceContainer) => {
     .collection("Attendance")
     .doc(currentMonthYear)
     .set({ timeClock: timeClockArray }, { merge: true });
+};
+
+exports.getPendingLeaves = async (requestType) => {
+  const output = [];
+  const getResult = await db.collectionGroup("Attendance").get();
+  function getMonthFromString(mon) {
+    return new Date(Date.parse(mon + " 1, 2000")).getMonth();
+  }
+
+  if (!getResult.empty) {
+    getResult.forEach((document) => {
+      const dateToday = new Date();
+      const id = document.id;
+      if (
+        id.slice(-4) < dateToday.getFullYear() ||
+        getMonthFromString(id.slice(0, -4)) < dateToday.getMonth()
+      ) {
+        return;
+      }
+      const timeClock = document.data().timeClock;
+      if (!timeClock) return;
+      timeClock.forEach((log) => {
+        if (log.leave && !log.statusLeave) {
+          requestType === log.leave &&
+            output.push({
+              empId: document.ref.parent.parent.id,
+              monthGroup: id,
+              date: log.dateNow,
+            });
+        }
+      });
+    });
+  }
+  return output;
+};
+
+exports.updateLeaveStatus = async (empId, monthGroup, leaveDate, status) => {
+  const docRef = db
+    .collection("Employee")
+    .doc(empId)
+    .collection("Attendance")
+    .doc(monthGroup);
+
+  const document = await docRef.get();
+  const timeClock = document.data().timeClock;
+  const newTimeClock = timeClock.map((log) =>
+    log.dateNow === leaveDate ? { ...log, statusLeave: status } : log
+  );
+
+  return docRef.update({ timeClock: newTimeClock });
 };
 
 exports.deleteAttendance = async (employeeID) => {

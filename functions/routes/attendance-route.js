@@ -5,6 +5,8 @@ const {
   getAttendance,
   sickLeaveAttendacnce,
   vacationLeaveAttendacnce,
+  getLeaveRequests,
+  approveLeaveRequests,
 } = require("../src/attendance-leave-monitoring/attendance");
 
 exports.attendance = (app) => {
@@ -14,4 +16,6 @@ exports.attendance = (app) => {
   app.post("/getAttendance", getAttendance);
   app.post("/sickLeaveAttendance", sickLeaveAttendacnce);
   app.post("/vacationLeaveAttendance", vacationLeaveAttendacnce);
+  app.post("/get-leave-requests", getLeaveRequests);
+  app.post("/approve-leave-request", approveLeaveRequests);
 };

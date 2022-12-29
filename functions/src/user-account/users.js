@@ -2,7 +2,10 @@ const {
   createEmployeeDetails,
   loginAccount,
   updateAccount,
+  findEmployees,
+  findEmployeeById,
 } = require("../../repositories/user-repo");
+
 const { response } = require("../../util/response");
 
 exports.register = async (req, res) => {
@@ -35,13 +38,45 @@ exports.login = async (req, res) => {
 };
 
 exports.updateAccount = async (req, res) => {
+  const data = req.body.data;
+  const id = req.body.id;
   try {
-    const data = req.body.data;
-    await updateAccount(data).then((val) => {
-      response(res, 200, "successfully update an account!", "success");
-    });
-    response(res, 200, "no account found", "success");
+    await updateAccount(id, data);
+    response(res, 200, "successfully update an account!", "success");
   } catch (error) {
+    if (error.code === 5) {
+      return response(res, 400, "no account found", "success");
+    }
     response(res, 400, error.message, "something went wrong.");
+  }
+};
+
+exports.getEmployees = async (req, res) => {
+  const output = []; // only needs to return employee id, and name
+  const employees = await findEmployees();
+  employees.forEach((emp) => {
+    output.push({
+      id: emp.id,
+      name: emp.empFN || emp.name,
+      position: emp.employeePosition,
+    });
+  });
+  response(res, 200, `found ${output.length} employees`, output);
+};
+
+exports.getEmployeesById = async (req, res) => {
+  const id = req.body.id;
+
+  try {
+    const findEmployeesResult = await findEmployeeById(id);
+    if (!findEmployeesResult.exists) {
+      return response(res, 400, "Employee does not exist.");
+    }
+    response(res, 200, `found employee ${findEmployeesResult.id}`, {
+      id: findEmployeesResult.id,
+      ...findEmployeesResult.data(),
+    });
+  } catch (error) {
+    return response(res, 400, error.message);
   }
 };

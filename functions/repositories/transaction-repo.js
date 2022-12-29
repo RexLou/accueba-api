@@ -1,26 +1,39 @@
 const { db } = require("../util/admin");
 
-exports.getTransDoc = async () => {
+exports.getTransDoc = async (empId) => {
   const container = [];
-  const employeeRef = await db.collection("Transactions").get();
+  const employeeRef = await db
+    .collection("Employee")
+    .doc(empId)
+    .collection("Transactions")
+    .get();
+
   employeeRef.forEach((val) => {
     container.push(val.data());
   });
+
   return container;
 };
 
-exports.createTransDoc = async (data) => {
-  await db.collection("Transactions").add({ ...data });
+exports.createTransDoc = async (empId, data) => {
+  await db
+    .collection("Employee")
+    .doc(empId)
+    .collection("Transactions")
+    .add(data);
 };
 
-exports.deleteTransDoc = async (id) => {
-  await db.collection("Transactions").doc(id).delete();
-};
-exports.updateTransDoc = async (id, status) => {
-  await db.collection("Transactions").doc(id).set(
-    {
-      status: status,
-    },
-    { merge: true }
-  );
+// exports.deleteTransDoc = async (empId, id) => {
+//   await db
+//     .collection("Employee")
+//     .doc(empId)
+//     .collection("Transactions")
+//     .delete();
+// };
+exports.updateTransDoc = async (empId, data) => {
+  await db
+    .collection("Employee")
+    .doc(empId)
+    .collection("Transactions")
+    .update(data);
 };
