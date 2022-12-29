@@ -1,26 +1,27 @@
 const { db } = require("../util/admin");
 
-exports.getTransDoc = async (empId) => {
-  const container = [];
-  const employeeRef = await db
-    .collection("Employee")
-    .doc(empId)
+exports.getTransDoc = (transactionNumber) => {
+  return db
     .collection("Transactions")
+    .where("transactionNumber", "==", transactionNumber)
     .get();
-
-  employeeRef.forEach((val) => {
-    container.push(val.data());
-  });
-
-  return container;
 };
 
-exports.createTransDoc = async (empId, data) => {
-  await db
-    .collection("Employee")
-    .doc(empId)
-    .collection("Transactions")
-    .add(data);
+exports.createTransDoc = (transactionId, data) => {
+  const payload = { ...data, timestamp: new Date() };
+
+  if (payload.employeePosition === "Helper") {
+    transactionId = `${transactionId}-H`;
+  }
+  return Promise.all([
+    db.collection("Transactions").doc(transactionId).set(payload),
+    db
+      .collection("Employee")
+      .doc(data.employeeId)
+      .collection("Transaction")
+      .doc(transactionId)
+      .set(payload),
+  ]);
 };
 
 // exports.deleteTransDoc = async (empId, id) => {
@@ -30,10 +31,10 @@ exports.createTransDoc = async (empId, data) => {
 //     .collection("Transactions")
 //     .delete();
 // };
-exports.updateTransDoc = async (empId, data) => {
-  await db
-    .collection("Employee")
-    .doc(empId)
-    .collection("Transactions")
-    .update(data);
-};
+
+// exports.updateTransDoc = (empId, data) => {
+//   return db
+//     .collection("Transactions")
+//     .where("employeeID", "==", empId)
+//     .update(data);
+// };
