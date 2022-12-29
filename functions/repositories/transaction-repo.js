@@ -1,5 +1,9 @@
 const { db } = require("../util/admin");
 
+exports.getAllTransDoc = () => {
+  return db.collection("Transactions").get();
+};
+
 exports.getTransDoc = (transactionNumber) => {
   return db
     .collection("Transactions")
@@ -22,6 +26,44 @@ exports.createTransDoc = (transactionId, data) => {
       .doc(transactionId)
       .set(payload),
   ]);
+};
+
+exports.updateLastTransaction = async (employeeId, data) => {
+  const promisesResult = await Promise.all([
+    db
+      .collection("Transactions")
+      .where("employeeId", "==", employeeId)
+      .orderBy("timestamp", "desc")
+      .limit(1)
+      .get(),
+    db
+      .collection("Employee")
+      .doc(employeeId)
+      .collection("Transaction")
+      .orderBy("timestamp", "desc")
+      .limit(1)
+      .get(),
+  ]);
+
+  for (const promise of promisesResult) {
+    const ref = promise.docs[0].ref;
+    db.runTransaction(async (t) => {
+      const doc = await t.get(ref);
+      if (data.totalBonuses) {
+        const newTotalWage = doc.data().totalWage + data.totalBonuses;
+        t.update(ref, { ...data, totalWage: newTotalWage });
+      } else {
+        const newTotalWage = doc.data().totalWage - data.totalDeductions;
+        t.update(ref, { ...data, totalWage: newTotalWage });
+      }
+    });
+  }
+
+  // return Promise.all(
+  //   promisesResult.map((promise) => {
+  //     promise.docs[0].ref.update(data);
+  //   })
+  // );
 };
 
 // exports.deleteTransDoc = async (empId, id) => {

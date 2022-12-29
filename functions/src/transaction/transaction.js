@@ -4,12 +4,15 @@ const {
   createTransDoc,
   deleteTransDoc,
   updateTransDoc,
+  updateLastTransaction,
+  getAllTransDoc,
 } = require("../../repositories/transaction-repo");
 
 exports.createTransaction = async (req, res) => {
   const data = req.body.data;
   if (!data) return response(res, 400, "Please input a data field");
   const {
+    date,
     clientAddress,
     clientContactNumber,
     clientName,
@@ -35,6 +38,7 @@ exports.createTransaction = async (req, res) => {
   } = data;
 
   if (
+    !date ||
     !clientAddress ||
     !clientContactNumber ||
     !clientName ||
@@ -66,13 +70,14 @@ exports.createTransaction = async (req, res) => {
   const operations = [];
 
   const payload = {
+    date,
     clientAddress: clientAddress,
     clientContact: clientContactNumber,
     clientName: clientName,
     reasonForDelay: reasonForDelay || "",
     status: status,
     transactionNumber: transactionNumber,
-    totalDeliveryPaid,
+    totalDeliveryPaid: Number(totalDeliveryPaid),
     // deductions
     salaryAdvance: salaryAdvance || 0,
     debt: debt || 0,
@@ -89,7 +94,7 @@ exports.createTransaction = async (req, res) => {
     thirteenthMonthPay: thirteenthMonthPay || 0,
     otherBonuses: otherBonuses || 0,
     totalBonuses,
-    totalHours: totalDeliveryHours,
+    totalHours: Number(totalDeliveryHours),
   };
 
   operations.push({
@@ -120,11 +125,15 @@ exports.createTransaction = async (req, res) => {
   }
 };
 
-exports.getTransaction = async (req, res) => {
+exports.getTransactions = async (req, res) => {
+  const output = [];
   try {
-    getTransDoc().then((val) => {
-      response(res, 200, "successfully create a document", val);
+    const docs = await getAllTransDoc();
+    docs.forEach((doc) => {
+      // const docData = doc.data()
+      output.push(doc.data());
     });
+    response(res, 200, "success", output);
   } catch (error) {
     response(res, 400, error.message, "something went wrong.");
   }
@@ -132,7 +141,6 @@ exports.getTransaction = async (req, res) => {
 
 exports.getTransactionById = async (req, res) => {
   const transactionNumber = req.body.transactionNumber;
-  console.log("transactionNumber", transactionNumber);
   let transaction = {};
   let driverId = "";
   let helperId = "";
@@ -184,5 +192,98 @@ exports.updateTransaction = async (req, res) => {
     });
   } catch (error) {
     response(res, 400, error.message, "something went wrong.");
+  }
+};
+
+exports.addBonus = async (req, res) => {
+  const { employeeId, data } = req.body;
+  if (!data) return response(res, 400, "Please input a data field");
+  const { overtime, holidaysWorked, thirteenthMonthPay, otherBonuses } = data;
+  const payload = {};
+  let totalBonuses = 0;
+
+  if (Number(overtime)) {
+    payload.overtime = Number(overtime);
+    totalBonuses += Number(overtime);
+  }
+  if (Number(holidaysWorked)) {
+    payload.holidaysWorked = Number(holidaysWorked);
+    totalBonuses += Number(holidaysWorked);
+  }
+  if (Number(thirteenthMonthPay)) {
+    payload.thirteenthMonthPay = Number(thirteenthMonthPay);
+    totalBonuses += Number(thirteenthMonthPay);
+  }
+  if (Number(otherBonuses)) {
+    payload.otherBonuses = Number(otherBonuses);
+    totalBonuses += Number(otherBonuses);
+  }
+
+  payload.totalBonuses = totalBonuses;
+  // console.log("payload :>> ", payload);
+  try {
+    await updateLastTransaction(employeeId, payload);
+    response(res, 200, "success");
+  } catch (error) {
+    response(res, 400, error.message);
+  }
+};
+
+exports.addDeductions = async (req, res) => {
+  const { employeeId, data } = req.body;
+  if (!data) return response(res, 400, "Please input a data field");
+  const {
+    salaryAdvance,
+    debt,
+    excess,
+    loan,
+    pagibig,
+    sss,
+    philhealth,
+    otherDeductions,
+  } = data;
+  const payload = {};
+  let totalDeductions = 0;
+
+  if (Number(salaryAdvance)) {
+    payload.salaryAdvance = Number(salaryAdvance);
+    totalDeductions += Number(salaryAdvance);
+  }
+  if (Number(debt)) {
+    payload.debt = Number(debt);
+    totalDeductions += Number(debt);
+  }
+  if (Number(excess)) {
+    payload.excess = Number(excess);
+    totalDeductions += Number(excess);
+  }
+  if (Number(loan)) {
+    payload.loan = Number(loan);
+    totalDeductions += Number(loan);
+  }
+  if (Number(pagibig)) {
+    payload.pagibig = Number(pagibig);
+    totalDeductions += Number(pagibig);
+  }
+  if (Number(sss)) {
+    payload.sss = Number(sss);
+    totalDeductions += Number(sss);
+  }
+  if (Number(philhealth)) {
+    payload.philhealth = Number(philhealth);
+    totalDeductions += Number(philhealth);
+  }
+  if (Number(otherDeductions)) {
+    payload.otherDeductions = Number(otherDeductions);
+    totalDeductions += Number(otherDeductions);
+  }
+
+  payload.totalDeductions = totalDeductions;
+  // console.log("payload :>> ", payload);
+  try {
+    await updateLastTransaction(employeeId, payload);
+    response(res, 200, "success");
+  } catch (error) {
+    response(res, 400, error.message);
   }
 };
