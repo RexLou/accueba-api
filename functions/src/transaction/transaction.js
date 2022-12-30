@@ -6,6 +6,7 @@ const {
   updateTransDoc,
   updateLastTransaction,
   getAllTransDoc,
+  getLastTransactionAdjustments,
 } = require("../../repositories/transaction-repo");
 
 exports.createTransaction = async (req, res) => {
@@ -196,25 +197,25 @@ exports.updateTransaction = async (req, res) => {
 };
 
 exports.addBonus = async (req, res) => {
-  const { employeeId, data } = req.body;
+  const { employeeId, data, docId } = req.body;
   if (!data) return response(res, 400, "Please input a data field");
   const { overtime, holidaysWorked, thirteenthMonthPay, otherBonuses } = data;
   const payload = {};
   let totalBonuses = 0;
 
-  if (Number(overtime)) {
+  if (Number(overtime) || overtime === 0) {
     payload.overtime = Number(overtime);
     totalBonuses += Number(overtime);
   }
-  if (Number(holidaysWorked)) {
+  if (Number(holidaysWorked) || holidaysWorked === 0) {
     payload.holidaysWorked = Number(holidaysWorked);
     totalBonuses += Number(holidaysWorked);
   }
-  if (Number(thirteenthMonthPay)) {
+  if (Number(thirteenthMonthPay) || thirteenthMonthPay === 0) {
     payload.thirteenthMonthPay = Number(thirteenthMonthPay);
     totalBonuses += Number(thirteenthMonthPay);
   }
-  if (Number(otherBonuses)) {
+  if (Number(otherBonuses) || otherBonuses === 0) {
     payload.otherBonuses = Number(otherBonuses);
     totalBonuses += Number(otherBonuses);
   }
@@ -222,7 +223,7 @@ exports.addBonus = async (req, res) => {
   payload.totalBonuses = totalBonuses;
   // console.log("payload :>> ", payload);
   try {
-    await updateLastTransaction(employeeId, payload);
+    await updateLastTransaction(employeeId, docId, payload);
     response(res, 200, "success");
   } catch (error) {
     response(res, 400, error.message);
@@ -230,7 +231,7 @@ exports.addBonus = async (req, res) => {
 };
 
 exports.addDeductions = async (req, res) => {
-  const { employeeId, data } = req.body;
+  const { employeeId, docId, data } = req.body;
   if (!data) return response(res, 400, "Please input a data field");
   const {
     salaryAdvance,
@@ -281,9 +282,18 @@ exports.addDeductions = async (req, res) => {
   payload.totalDeductions = totalDeductions;
   // console.log("payload :>> ", payload);
   try {
-    await updateLastTransaction(employeeId, payload);
+    await updateLastTransaction(employeeId, docId, payload);
     response(res, 200, "success");
   } catch (error) {
     response(res, 400, error.message);
   }
+};
+
+exports.getAdjustments = async (req, res) => {
+  const employeeID = req.body.empId;
+  const data = await getLastTransactionAdjustments(employeeID);
+  if (!Object.keys(data).length) {
+    return response(res, 400, "No transaction found", data);
+  }
+  response(res, 200, "success", data);
 };

@@ -1,4 +1,5 @@
 const { db } = require("../util/admin");
+const { findEmployeeByEmpId } = require("./user-repo");
 
 exports.getAllTransDoc = () => {
   return db.collection("Transactions").get();
@@ -28,7 +29,7 @@ exports.createTransDoc = (transactionId, data) => {
   ]);
 };
 
-exports.updateLastTransaction = async (employeeId, data) => {
+exports.updateLastTransaction = async (employeeId, docId, data) => {
   const promisesResult = await Promise.all([
     db
       .collection("Transactions")
@@ -38,7 +39,7 @@ exports.updateLastTransaction = async (employeeId, data) => {
       .get(),
     db
       .collection("Employee")
-      .doc(employeeId)
+      .doc(docId)
       .collection("Transaction")
       .orderBy("timestamp", "desc")
       .limit(1)
@@ -80,3 +81,77 @@ exports.updateLastTransaction = async (employeeId, data) => {
 //     .where("employeeID", "==", empId)
 //     .update(data);
 // };
+
+exports.getLastTransactionAdjustments = async (employeeId) => {
+  const [employee, getResult] = await Promise.all([
+    findEmployeeByEmpId(employeeId),
+    db
+      .collection("Transactions")
+      .where("employeeId", "==", employeeId)
+      .orderBy("timestamp", "desc")
+      .limit(1)
+      .get(),
+  ]);
+
+  if (getResult.empty) return {};
+
+  const {
+    salaryAdvance,
+    debt,
+    excess,
+    loan,
+    pagibig,
+    sss,
+    philhealth,
+    otherDeductions,
+    overtime,
+    holidaysWorked,
+    thirteenthMonthPay,
+    otherBonuses,
+  } = getResult.docs[0].data();
+  // console.log("id", getResult.docs[0].id);
+  const data = {
+    employee,
+    deductions: {},
+    bonuses: {},
+  };
+
+  if (salaryAdvance) {
+    data.deductions.salaryAdvance = salaryAdvance;
+  }
+  if (debt) {
+    data.deductions.debt = debt;
+  }
+  if (excess) {
+    data.deductions.excess = excess;
+  }
+  if (loan) {
+    data.deductions.loan = loan;
+  }
+  if (pagibig) {
+    data.deductions.pagibig = pagibig;
+  }
+  if (sss) {
+    data.deductions.sss = sss;
+  }
+  if (philhealth) {
+    data.deductions.philhealth = philhealth;
+  }
+  if (otherDeductions) {
+    data.deductions.otherDeductions = otherDeductions;
+  }
+  if (overtime) {
+    data.bonuses.overtime = overtime;
+  }
+  if (holidaysWorked) {
+    data.bonuses.holidaysWorked = holidaysWorked;
+  }
+  if (thirteenthMonthPay) {
+    data.bonuses.thirteenthMonthPay = thirteenthMonthPay;
+  }
+  if (otherBonuses) {
+    data.bonuses.otherBonuses = otherBonuses;
+  }
+
+  return data;
+};

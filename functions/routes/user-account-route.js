@@ -3,7 +3,7 @@ const {
   login,
   updateAccount,
   getEmployees,
-  getEmployeesById,
+  getEmployeesByDocId,
 } = require("../src/user-account/users");
 
 exports.userAccount = (app) => {
@@ -14,5 +14,5 @@ exports.userAccount = (app) => {
   app.post("/login", login);
   app.post("/updateAccount", updateAccount);
   app.post("/get-employees", getEmployees);
-  app.post("/get-employee-by-id", getEmployeesById);
+  app.post("/get-employee-by-doc-id", getEmployeesByDocId);
 };

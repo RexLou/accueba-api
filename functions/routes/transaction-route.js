@@ -6,6 +6,7 @@ const {
   getTransactionById,
   addBonus,
   addDeductions,
+  getAdjustments,
 } = require("../src/transaction/transaction");
 
 exports.transaction = (app) => {
@@ -14,6 +15,7 @@ exports.transaction = (app) => {
   app.post("/getTransactionById", getTransactionById);
   app.post("/addBonus", addBonus);
   app.post("/addDeduction", addDeductions);
+  app.post("/getAdjustments", getAdjustments);
   app.post("/deleteTransaction", deleteTransaction);
   app.post("/updateTransaction", updateTransaction);
 };

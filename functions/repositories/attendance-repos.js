@@ -157,7 +157,7 @@ exports.getPendingLeaves = async (requestType) => {
         if (log.leave && !log.statusLeave) {
           requestType === log.leave &&
             output.push({
-              empId: document.ref.parent.parent.id,
+              empDocId: document.ref.parent.parent.id,
               monthGroup: id,
               date: log.dateNow,
             });

@@ -39,9 +39,9 @@ exports.login = async (req, res) => {
 
 exports.updateAccount = async (req, res) => {
   const data = req.body.data;
-  const id = req.body.id;
+  const docId = req.body.id;
   try {
-    await updateAccount(id, data);
+    await updateAccount(docId, data);
     response(res, 200, "successfully update an account!", "success");
   } catch (error) {
     if (error.code === 5) {
@@ -56,7 +56,8 @@ exports.getEmployees = async (req, res) => {
   const employees = await findEmployees();
   employees.forEach((emp) => {
     output.push({
-      id: emp.id,
+      docId: emp.id,
+      empId: emp.empID,
       name: emp.empFN || emp.name,
       position: emp.employeePosition,
     });
@@ -64,8 +65,8 @@ exports.getEmployees = async (req, res) => {
   response(res, 200, `found ${output.length} employees`, output);
 };
 
-exports.getEmployeesById = async (req, res) => {
-  const id = req.body.id;
+exports.getEmployeesByDocId = async (req, res) => {
+  const id = req.body.docId;
 
   try {
     const findEmployeesResult = await findEmployeeById(id);

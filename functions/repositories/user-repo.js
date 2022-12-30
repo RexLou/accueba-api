@@ -27,6 +27,18 @@ exports.findEmployeeById = (id) => {
   return collectionRef.doc(id).get();
 };
 
+exports.findEmployeeByEmpId = async (empId) => {
+  const getResult = await db
+    .collection("Employee")
+    .where("empID", "==", Number(empId))
+    .get();
+  if (getResult.empty) return {};
+  return {
+    id: getResult.docs[0].id,
+    ...getResult.docs[0].data(),
+  };
+};
+
 exports.loginAccount = async (userID, password) => {
   let result = false;
   const employeeRef = await db
@@ -50,9 +62,9 @@ exports.loginAccount = async (userID, password) => {
   };
 };
 
-exports.updateAccount = (empId, data) => {
+exports.updateAccount = (empDocId, data) => {
   return db
     .collection("Employee")
-    .doc(empId)
+    .doc(empDocId)
     .update({ ...data });
 };
