@@ -10,6 +10,7 @@ const {
   getPendingLeaves,
   approveLeave,
   updateLeaveStatus,
+  checkIfCreateNewDocument,
 } = require("../../repositories/attendance-repos");
 
 const { response } = require("../../util/response");
@@ -18,6 +19,7 @@ exports.timeInAttendance = async (req, res) => {
   try {
     const employeeID = req.body.employeeID;
     console.log(employeeID);
+    await checkIfCreateNewDocument(employeeID);
     const attendanceContainer = await getAttendance(employeeID);
 
     await timeInAttendance(employeeID, attendanceContainer).then((val) => {
@@ -31,6 +33,7 @@ exports.timeInAttendance = async (req, res) => {
 exports.timeOutAttendance = async (req, res) => {
   try {
     const employeeID = req.body.employeeID;
+    await checkIfCreateNewDocument(employeeID);
     const attendanceContainer = await getAttendance(employeeID);
 
     await timeOutAttendance(employeeID, attendanceContainer).then((val) => {
@@ -43,6 +46,7 @@ exports.timeOutAttendance = async (req, res) => {
 exports.sickLeaveAttendacnce = async (req, res) => {
   try {
     const employeeID = req.body.employeeID;
+    await checkIfCreateNewDocument(employeeID);
     const attendanceContainer = await getAttendance(employeeID);
 
     await sickLeaveAttendance(employeeID, attendanceContainer).then((val) => {
@@ -55,6 +59,7 @@ exports.sickLeaveAttendacnce = async (req, res) => {
 exports.vacationLeaveAttendacnce = async (req, res) => {
   try {
     const employeeID = req.body.employeeID;
+    await checkIfCreateNewDocument(employeeID);
     const attendanceContainer = await getAttendance(employeeID);
 
     await vacationLeaveAttendance(employeeID, attendanceContainer).then(

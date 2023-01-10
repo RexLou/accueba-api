@@ -222,3 +222,23 @@ exports.isAttendanceDocExists = async (id) => {
   }
   return result;
 };
+exports.checkIfCreateNewDocument = async (id) => {
+  const currentMonthYear = getCurrentMonth();
+  const employeeRef = await db
+    .collection("Employee")
+    .doc(id)
+    .collection("Attendance")
+    .doc(currentMonthYear)
+    .get();
+  const employeeDoc = employeeRef.data();
+  if (employeeDoc == null || employeeDoc == undefined) {
+    await db
+      .collection("Employee")
+      .doc(id)
+      .collection("Attendance")
+      .doc(currentMonthYear)
+      .set({ timeClock: [] });
+    return;
+  }
+  return;
+};

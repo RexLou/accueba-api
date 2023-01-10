@@ -8,7 +8,7 @@ exports.createEmployeeDetails = async (data) => {
     .add({ ...data })
     .then((val) => {
       createAttendance(val.id);
-      res.send({ status: 200, message: "success" });
+      // res.send({ status: 200, message: "success" });
     });
 };
 
