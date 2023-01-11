@@ -13,7 +13,8 @@ exports.getTransDoc = (transactionNumber) => {
 };
 
 exports.createTransDoc = (transactionId, data) => {
-  const payload = { ...data, timestamp: new Date() };
+  let { documentId, ...payload } = data;
+  payload = { ...payload, timestamp: new Date() };
 
   if (payload.employeePosition === "Helper") {
     transactionId = `${transactionId}-H`;
@@ -22,7 +23,7 @@ exports.createTransDoc = (transactionId, data) => {
     db.collection("Transactions").doc(transactionId).set(payload),
     db
       .collection("Employee")
-      .doc(data.employeeId)
+      .doc(documentId)
       .collection("Transaction")
       .doc(transactionId)
       .set(payload),
@@ -155,5 +156,3 @@ exports.getLastTransactionAdjustments = async (employeeId) => {
 
   return data;
 };
-
-

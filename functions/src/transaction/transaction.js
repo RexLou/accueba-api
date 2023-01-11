@@ -8,6 +8,7 @@ const {
   getAllTransDoc,
   getLastTransactionAdjustments,
 } = require("../../repositories/transaction-repo");
+const { findEmployeeByEmpId } = require("../../repositories/user-repo");
 
 exports.createTransaction = async (req, res) => {
   const data = req.body.data;
@@ -98,8 +99,11 @@ exports.createTransaction = async (req, res) => {
     totalHours: Number(totalDeliveryHours),
   };
 
+  const driver = await findEmployeeByEmpId(driverId);
+
   operations.push({
     ...payload,
+    documentId: driver.id,
     employeePosition: "Driver",
     employeeId: driverId,
     totalWages:
@@ -107,8 +111,11 @@ exports.createTransaction = async (req, res) => {
   });
 
   if (helperId) {
+    const helper = await findEmployeeByEmpId(helperId);
+
     operations.push({
       ...payload,
+      documentId: helper.id,
       employeePosition: "Helper",
       employeeId: helperId,
       totalWages:
