@@ -112,7 +112,6 @@ exports.createTransaction = async (req, res) => {
 
   if (helperId) {
     const helper = await findEmployeeByEmpId(helperId);
-
     operations.push({
       ...payload,
       documentId: helper.id,
@@ -120,12 +119,13 @@ exports.createTransaction = async (req, res) => {
       employeeId: helperId,
       totalWages:
         totalDeliveryPaid * 0.08 - payload.totalDeductions + totalBonuses,
+      transactionNumber: `${transactionNumber}-H`,
     });
   }
 
   try {
     await Promise.all(
-      operations.map((op) => createTransDoc(transactionNumber, op))
+      operations.map((op) => createTransDoc(op.transactionNumber, op))
     );
     response(res, 200, "successfully created a transaction", "success");
   } catch (error) {
@@ -155,8 +155,8 @@ exports.getTransactionById = async (req, res) => {
 
   try {
     const getResult = await getTransDoc(transactionNumber);
-
     getResult.forEach((val) => {
+      if (transactionNumber !== val.id) return;
       const transactionData = val.data();
       transaction = transactionData;
       const employeePosition = transactionData.employeePosition;
@@ -168,6 +168,8 @@ exports.getTransactionById = async (req, res) => {
         helperId = employeeId;
       }
     });
+
+    console.log("transaction", transaction);
 
     const payload = {
       ...transaction,
@@ -208,26 +210,26 @@ exports.addBonus = async (req, res) => {
   if (!data) return response(res, 400, "Please input a data field");
   const { overtime, holidaysWorked, thirteenthMonthPay, otherBonuses } = data;
   const payload = {};
-  let totalBonuses = 0;
+  // let totalBonuses = 0;
 
-  if (Number(overtime) || overtime === 0) {
+  if (Number(overtime) >= 0) {
     payload.overtime = Number(overtime);
-    totalBonuses += Number(overtime);
+    // totalBonuses += Number(overtime);
   }
-  if (Number(holidaysWorked) || holidaysWorked === 0) {
+  if (Number(holidaysWorked) >= 0) {
     payload.holidaysWorked = Number(holidaysWorked);
-    totalBonuses += Number(holidaysWorked);
+    // totalBonuses += Number(holidaysWorked);
   }
-  if (Number(thirteenthMonthPay) || thirteenthMonthPay === 0) {
+  if (Number(thirteenthMonthPay) >= 0) {
     payload.thirteenthMonthPay = Number(thirteenthMonthPay);
-    totalBonuses += Number(thirteenthMonthPay);
+    // totalBonuses += Number(thirteenthMonthPay);
   }
-  if (Number(otherBonuses) || otherBonuses === 0) {
+  if (Number(otherBonuses) >= 0) {
     payload.otherBonuses = Number(otherBonuses);
-    totalBonuses += Number(otherBonuses);
+    // totalBonuses += Number(otherBonuses);
   }
 
-  payload.totalBonuses = totalBonuses;
+  // payload.totalBonuses = totalBonuses;
   // console.log("payload :>> ", payload);
   try {
     await updateLastTransaction(employeeId, docId, payload);
@@ -251,42 +253,42 @@ exports.addDeductions = async (req, res) => {
     otherDeductions,
   } = data;
   const payload = {};
-  let totalDeductions = 0;
+  // let totalDeductions = 0;
 
-  if (Number(salaryAdvance)) {
+  if (Number(salaryAdvance) >= 0) {
     payload.salaryAdvance = Number(salaryAdvance);
-    totalDeductions += Number(salaryAdvance);
+    // totalDeductions += Number(salaryAdvance);
   }
-  if (Number(debt)) {
+  if (Number(debt) >= 0) {
     payload.debt = Number(debt);
-    totalDeductions += Number(debt);
+    // totalDeductions += Number(debt);
   }
-  if (Number(excess)) {
+  if (Number(excess) >= 0) {
     payload.excess = Number(excess);
-    totalDeductions += Number(excess);
+    // totalDeductions += Number(excess);
   }
-  if (Number(loan)) {
+  if (Number(loan) >= 0) {
     payload.loan = Number(loan);
-    totalDeductions += Number(loan);
+    // totalDeductions += Number(loan);
   }
-  if (Number(pagibig)) {
+  if (Number(pagibig) >= 0) {
     payload.pagibig = Number(pagibig);
-    totalDeductions += Number(pagibig);
+    // totalDeductions += Number(pagibig);
   }
-  if (Number(sss)) {
+  if (Number(sss) >= 0) {
     payload.sss = Number(sss);
-    totalDeductions += Number(sss);
+    // totalDeductions += Number(sss);
   }
-  if (Number(philhealth)) {
+  if (Number(philhealth) >= 0) {
     payload.philhealth = Number(philhealth);
-    totalDeductions += Number(philhealth);
+    // totalDeductions += Number(philhealth);
   }
-  if (Number(otherDeductions)) {
+  if (Number(otherDeductions) >= 0) {
     payload.otherDeductions = Number(otherDeductions);
-    totalDeductions += Number(otherDeductions);
+    // totalDeductions += Number(otherDeductions);
   }
 
-  payload.totalDeductions = totalDeductions;
+  // payload.totalDeductions = totalDeductions;
   // console.log("payload :>> ", payload);
   try {
     await updateLastTransaction(employeeId, docId, payload);

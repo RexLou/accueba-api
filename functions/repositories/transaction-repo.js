@@ -15,10 +15,6 @@ exports.getTransDoc = (transactionNumber) => {
 exports.createTransDoc = (transactionId, data) => {
   let { documentId, ...payload } = data;
   payload = { ...payload, timestamp: new Date() };
-
-  if (payload.employeePosition === "Helper") {
-    transactionId = `${transactionId}-H`;
-  }
   return Promise.all([
     db.collection("Transactions").doc(transactionId).set(payload),
     db
@@ -51,13 +47,52 @@ exports.updateLastTransaction = async (employeeId, docId, data) => {
     const ref = promise.docs[0].ref;
     db.runTransaction(async (t) => {
       const doc = await t.get(ref);
-      if (data.totalBonuses) {
-        const newTotalWage = doc.data().totalWage + data.totalBonuses;
-        t.update(ref, { ...data, totalWage: newTotalWage });
-      } else {
-        const newTotalWage = doc.data().totalWage - data.totalDeductions;
-        t.update(ref, { ...data, totalWage: newTotalWage });
+      const docData = doc.data();
+      let newTotalBonuses = docData.totalBonuses;
+      let newTotalDeductions = docData.totalDeductions;
+      let newTotalWages = docData.totalWages;
+
+      // recompute totalBonuses or totalDeductions, and totalWages
+      for (const key in data) {
+        if (
+          // for computing bonuses
+          key === "overtime" ||
+          key === "holidaysWorked" ||
+          key === "thirteenthMonthPay" ||
+          key === "otherBonuses"
+        ) {
+          if (data[key] > docData[key]) {
+            // if new bonus is greater, increment bonus
+            newTotalBonuses += data[key] - docData[key];
+            newTotalWages += data[key] - docData[key];
+          } else {
+            // reduce bonus
+            newTotalBonuses -= docData[key] - data[key];
+            newTotalWages -= docData[key] - data[key];
+          }
+          t.update(ref, {
+            ...data,
+            totalBonuses: newTotalBonuses,
+            totalWages: newTotalWages,
+          });
+        } else {
+          // for computing deductions
+          if (data[key] > docData[key]) {
+            newTotalDeductions += data[key] - docData[key];
+            newTotalWages -= data[key] - docData[key];
+          } else {
+            newTotalDeductions -= docData[key] - data[key];
+            newTotalWages += docData[key] - data[key];
+          }
+          t.update(ref, {
+            ...data,
+            totalDeductions: newTotalDeductions,
+            totalWages: newTotalWages,
+          });
+        }
       }
+      // console.log("newTotalWages", newTotalWages);
+      // return;
     });
   }
 
