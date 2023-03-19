@@ -1,4 +1,7 @@
-const { getLatestPayrollRepo, getAllPayrollRepo } = require("../../repositories/payroll-repo");
+const {
+  getLatestPayrollRepo,
+  getAllPayrollRepo,
+} = require("../../repositories/payroll-repo");
 exports.getLatestPayroll = async (req, res) => {
   try {
     const id = req.body.id;
@@ -21,4 +24,4 @@ exports.getAllPayroll = async (req, res) => {
   } catch (error) {
     res.send({ result: error.message, message: "failed" });
   }
-}
+};

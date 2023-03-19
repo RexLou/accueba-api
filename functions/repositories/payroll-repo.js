@@ -12,10 +12,12 @@ exports.getLatestPayrollRepo = async (id) => {
 };
 
 exports.getAllPayrollRepo = async (id) => {
-  const container = []
-  const transactionRef = await db.collection("Transactions")
-  .where("employeeId", "==", id.toString())
-  .orderBy("timestamp", "desc").get();
+  const container = [];
+  const transactionRef = await db
+    .collection("Transactions")
+    .where("employeeId", "==", id.toString())
+    .orderBy("timestamp", "desc")
+    .get();
 
   transactionRef.forEach((val) => {
     container.push(val.data());

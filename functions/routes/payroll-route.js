@@ -6,4 +6,4 @@ exports.payrollRoute = (app) => {
 
 exports.allPayrollRoute = (app) => {
   app.post("/getAllPayroll", getAllPayroll);
-}
+};
