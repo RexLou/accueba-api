@@ -10,3 +10,12 @@ exports.getLatestPayrollRepo = async (id) => {
   const doc = transactionRef.docs[0].data();
   return doc;
 };
+
+exports.getAllPayrollRepo = async (id) => {
+  const transactionRef = await db.collection("Transactions")
+  .where("employeeId", "==", id.toString())
+  .orderBy("timestamp", "desc").get();
+
+  const doc = transactionRef.docs.data();
+  return doc
+}
