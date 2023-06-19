@@ -8,8 +8,12 @@ const {
   getAllTransDoc,
   getLastTransactionAdjustments,
 } = require("../../repositories/transaction-repo");
+const client = require("twilio")(
+  "AC44deb238c466c7ea0f1de99fc42b015e",
+  "7516bc62298e8ee08e21d4a0750d5ffe"
+);
 const { findEmployeeByEmpId } = require("../../repositories/user-repo");
-
+const { db } = require("../../util/admin");
 exports.createTransaction = async (req, res) => {
   const data = req.body.data;
   if (!data) return response(res, 400, "Please input a data field");
@@ -24,7 +28,7 @@ exports.createTransaction = async (req, res) => {
     status,
     transactionNumber,
     totalDeliveryPaid,
-    totalDeliveryHours,
+    // totalDeliveryHours,
     salaryAdvance,
     debt,
     excess,
@@ -47,8 +51,8 @@ exports.createTransaction = async (req, res) => {
     !driverId ||
     !status ||
     !transactionNumber ||
-    !totalDeliveryPaid ||
-    !totalDeliveryHours
+    !totalDeliveryPaid
+    // || !totalDeliveryHours
   ) {
     return response(res, 400, "incorrect fields");
   }
@@ -96,7 +100,7 @@ exports.createTransaction = async (req, res) => {
     thirteenthMonthPay: thirteenthMonthPay || 0,
     otherBonuses: otherBonuses || 0,
     totalBonuses,
-    totalHours: Number(totalDeliveryHours),
+    // totalHours: Number(totalDeliveryHours),
   };
 
   const driver = await findEmployeeByEmpId(driverId);
@@ -122,7 +126,21 @@ exports.createTransaction = async (req, res) => {
       transactionNumber: `${transactionNumber}-H`,
     });
   }
+  console.log(clientContactNumber);
+  try {
+    client.messages
+      .create({
+        body: "Your payroll has been released! Please login to https://accueba-website-iyr6.vercel.app.",
+        to: `+63${clientContactNumber}`,
+        from: "+15856288930",
+      })
+      .then((message) => console.log(message))
+      .catch((e) => console.log(e.message));
 
+    // clientContactNumber;
+  } catch (error) {
+    console.log(error.message);
+  }
   try {
     await Promise.all(
       operations.map((op) => createTransDoc(op.transactionNumber, op))
@@ -305,4 +323,16 @@ exports.getAdjustments = async (req, res) => {
     return response(res, 400, "No transaction found", data);
   }
   response(res, 200, "success", data);
+};
+exports.getClientData = async (req, res) => {
+  try {
+    const output = [];
+    const clientRef = await db.collection("Clients").get();
+    clientRef.forEach((doc) => {
+      output.push(doc.data());
+    });
+    response(res, 200, "success", output);
+  } catch (error) {
+    response(res, 400, error.message, "something went wrong.");
+  }
 };

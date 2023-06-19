@@ -15,7 +15,25 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 app.options("*", cors());
-
+app.get("/testmessage", async (req, res) => {
+  try {
+    const client = require("twilio")(
+      "AC44deb238c466c7ea0f1de99fc42b015e",
+      "7516bc62298e8ee08e21d4a0750d5ffe"
+    );
+    client.messages
+      .create({
+        body: `Your payroll has been relase P ${500}`,
+        to: "+639426459702",
+        from: "+15856288930",
+      })
+      .catch((e) => {
+        res.send({ message: e.message });
+      });
+  } catch (error) {
+    res.send({ message: error.message });
+  }
+});
 userAccount(app);
 employeeMod(app);
 transaction(app);
