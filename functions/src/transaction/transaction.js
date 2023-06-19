@@ -272,7 +272,7 @@ exports.addDeductions = async (req, res) => {
   } = data;
   const payload = {};
   // let totalDeductions = 0;
-
+  console.log(philhealth);
   if (Number(salaryAdvance) >= 0) {
     payload.salaryAdvance = Number(salaryAdvance);
     // totalDeductions += Number(salaryAdvance);
@@ -305,7 +305,7 @@ exports.addDeductions = async (req, res) => {
     payload.otherDeductions = Number(otherDeductions);
     // totalDeductions += Number(otherDeductions);
   }
-
+  console.log(philhealth);
   // payload.totalDeductions = totalDeductions;
   // console.log("payload :>> ", payload);
   try {
