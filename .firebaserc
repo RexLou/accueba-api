@@ -1,5 +1,8 @@
 {
   "projects": {
-    "default": "accueba-db"
-  }
+    "default": "accueba-db",
+    "main": "accueba-new"
+  },
+  "targets": {},
+  "etags": {}
 }
