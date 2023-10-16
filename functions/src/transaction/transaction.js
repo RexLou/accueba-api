@@ -171,33 +171,33 @@ exports.getTransactionById = async (req, res) => {
   let driverId = "";
   let helperId = "";
 
-  try {
-    const getResult = await getTransDoc(transactionNumber);
-    getResult.forEach((val) => {
-      if (transactionNumber !== val.id) return;
-      const transactionData = val.data();
-      transaction = transactionData;
-      const employeePosition = transactionData.employeePosition;
-      const employeeId = transactionData.employeeId;
-      if (employeePosition === "Driver") {
-        driverId = employeeId;
-      }
-      if (employeePosition === "Helper") {
-        helperId = employeeId;
-      }
-    });
+  // try {
+  const getResult = await getTransDoc(transactionNumber);
+  getResult.forEach((val) => {
+    if (transactionNumber !== val.id) return;
+    const transactionData = val.data();
+    transaction = transactionData;
+    const employeePosition = transactionData.employeePosition;
+    const employeeId = transactionData.employeeId;
+    if (employeePosition === "Driver") {
+      driverId = employeeId;
+    }
+    if (employeePosition === "Helper") {
+      helperId = employeeId;
+    }
+  });
 
-    console.log("transaction", transaction);
+  console.log("transaction", transaction);
 
-    const payload = {
-      ...transaction,
-      driverId,
-      helperId,
-    };
-    response(res, 200, "success", payload);
-  } catch (error) {
-    response(res, 400, error.message);
-  }
+  const payload = {
+    ...transaction,
+    driverId,
+    helperId,
+  };
+  response(res, 200, "success", payload);
+  // } catch (error) {
+  //   response(res, 400, error.message);
+  // }
 };
 
 exports.deleteTransaction = async (req, res) => {
@@ -308,12 +308,12 @@ exports.addDeductions = async (req, res) => {
   console.log(philhealth);
   // payload.totalDeductions = totalDeductions;
   // console.log("payload :>> ", payload);
-  try {
-    await updateLastTransaction(employeeId, docId, payload);
-    response(res, 200, "success");
-  } catch (error) {
-    response(res, 400, error.message);
-  }
+  // try {
+  await updateLastTransaction(employeeId, docId, payload);
+  response(res, 200, "success");
+  // } catch (error) {
+  //   response(res, 400, error.message);
+  // }
 };
 
 exports.getAdjustments = async (req, res) => {

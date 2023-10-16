@@ -42,9 +42,10 @@ exports.updateLastTransaction = async (employeeId, docId, data) => {
       .limit(1)
       .get(),
   ]);
-
+  console.log(promisesResult.length);
   for (const promise of promisesResult) {
     const ref = promise.docs[0].ref;
+    console.log(promise.docs[0].id);
     db.runTransaction(async (t) => {
       const doc = await t.get(ref);
       const docData = doc.data();
