@@ -19,7 +19,7 @@ app.get("/testmessage", async (req, res) => {
   try {
     const client = require("twilio")(
       "AC44deb238c466c7ea0f1de99fc42b015e",
-      "7516bc62298e8ee08e21d4a0750d5ffe"
+      "57ebdf3207d136fd0a4968899fba3aa5"
     );
     client.messages
       .create({
