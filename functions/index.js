@@ -16,23 +16,22 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 app.options("*", cors());
 app.get("/testmessage", async (req, res) => {
-  try {
-    const client = require("twilio")(
-      "AC44deb238c466c7ea0f1de99fc42b015e",
-      "57ebdf3207d136fd0a4968899fba3aa5"
-    );
-    client.messages
-      .create({
-        body: `Your payroll has been relase P ${500}`,
-        to: "+639426459702",
-        from: "+15856288930",
-      })
-      .catch((e) => {
-        res.send({ message: e.message });
-      });
-  } catch (error) {
-    res.send({ message: error.message });
-  }
+  // try {
+  const client = require("twilio")(
+    "AC44deb238c466c7ea0f1de99fc42b015e",
+    "9aa8d7234a5fd17c934e27157aa967b6"
+  );
+  client.messages.create({
+    body: `Your payroll has been relase P ${500}`,
+    to: "+639426459702",
+    from: "+15856288930",
+  });
+  // .catch((e) => {
+  //   res.send({ message: e.message, err: "success" });
+  // });
+  // } catch (error) {
+  //   res.send({ message: error.message, error: "HI" });
+  // }
 });
 userAccount(app);
 employeeMod(app);

@@ -10,7 +10,7 @@ const {
 } = require("../../repositories/transaction-repo");
 const client = require("twilio")(
   "AC44deb238c466c7ea0f1de99fc42b015e",
-  "57ebdf3207d136fd0a4968899fba3aa5"
+  "9aa8d7234a5fd17c934e27157aa967b6"
 );
 const { findEmployeeByEmpId } = require("../../repositories/user-repo");
 const { db } = require("../../util/admin");
@@ -125,13 +125,23 @@ exports.createTransaction = async (req, res) => {
         totalDeliveryPaid * 0.08 - payload.totalDeductions + totalBonuses,
       transactionNumber: `${transactionNumber}-H`,
     });
+
+    client.messages
+      .create({
+        body: "Your payroll has been released! Please login to https://accueba-website.vercel.app/.",
+        to: `${helper.empContactNo}`,
+        from: "+15856288930",
+      })
+      .then((message) => console.log(message))
+      .catch((e) => console.log(e.message));
   }
   console.log(clientContactNumber);
   try {
+    const driver = await findEmployeeByEmpId(driverId);
     client.messages
       .create({
-        body: "Your payroll has been released! Please login to https://accueba-website-iyr6.vercel.app.",
-        to: `+63${clientContactNumber}`,
+        body: "Your payroll has been released! Please login to https://accueba-website.vercel.app/",
+        to: `${driver.empContactNo}`,
         from: "+15856288930",
       })
       .then((message) => console.log(message))
